@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Data</title>
+</head>
+<body>
+  <h2>User List</h2>
+  <table id="userList" border="5">
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Password</th>
+        <th>Address</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      </tbody>
+  </table>
+  <div id="selectedUserId" style="display: none;"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    async function getUserList() {
+      try {
+        const response = await axios.get('http://localhost:3000/getlist');
+        const userList = response.data;
+
+        // Clear existing table rows before populating new data
+        const userListTable = document.getElementById('userList').getElementsByTagName('tbody')[0];
+        userListTable.innerHTML = "";
+
+        userList.forEach(user => {
+          const tableRow = `<tr>
+            <td>${user.email}</td>
+            <td>${user.first_name}</td>
+            <td>${user.last_name}</td>
+            <td>${user.password}</td>
+            <td>${user.address || 'NOT GIVEN'}</td>
+            <td><button onclick="editUser('${user.id}')">Edit</button></td>
+          </tr>`;
+          userListTable.innerHTML += tableRow;
+        });
+
+      } catch (error) {
+        console.error(error);
+        alert("Error fetching user list!");
+      }
+    }
+
+    // Call getUserList initially to display existing users when the page loads
+    getUserList();
+
+    const editButtons = document.querySelectorAll('#userList tbody button');
+
+    editButtons.forEach(button => {
+    button.addEventListener('click', async () => {
+      const userId = button.dataset.userId;
+      document.getElementById('selectedUserId').textContent = userId;
+      // Call function to fetch user data and populate edit form
+      editUser(userId);
+      });
+    });
+
+    // Function to handle edit button click
+    async function editUser(userId) {
+      try {
+        const response = await axios.get(`http://localhost:3000/getUserById?id=${userId}`);
+        const userData = response.data;
+
+        // Redirect to edit form page with user data
+        window.location.href = `editForm.html?id=${userId}`;
+    } catch (error) {
+        console.error(error);
+        alert("Error fetching user data for editing!");
+    }
+    }
+
+  </script>
+</body>
+</html>

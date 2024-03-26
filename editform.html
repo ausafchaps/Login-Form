@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User</title>
+    <style>
+        form {
+          max-width: 400px;
+          margin: 0 auto;
+          padding: 20px;
+          border: 10px solid #ccc;  
+          border-radius: 5px;
+        }
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+          width: 100%;
+          padding: 10px;
+          margin: 1px 0;
+          display: inline-block;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          box-sizing: border-box;
+        }
+        input[type="submit"] {
+          background-color: rgb(0, 185, 0);
+          color: white;
+          padding: 14px 20px;
+          margin: 8px 0;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          width: 100%;
+        }
+        input[type="submit"]:hover {
+          background-color: green;
+        }
+        .error {
+          color: red;
+        }
+      </style>
+</head>
+<body>
+<form id="editForm" onsubmit="submitEditForm(event)">
+    <h2>Edit User Details</h2>
+    <label for="email">Email:</label><br>
+    <input type="email" id="email" name="email" required><br><br>
+
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password" required><br><br>
+
+    <label for="first_name">First Name:</label><br>
+    <input type="text" id="first_name" name="first_name" required><br><br>
+
+    <label for="last_name">Last Name:</label><br>
+    <input type="text" id="last_name" name="last_name" required><br><br>
+
+    <label for="address">Address:</label><br>
+    <input type="text" id="address" name="address"><br><br>
+
+    <input type="submit" value="Update">
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+  // Extract userId from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const userId = urlParams.get('id');
+
+  // Function to populate form fields with user data
+  async function populateForm() {
+    try {
+      const response = await axios.get(`http://localhost:3000/getUserById?id=${userId}`);
+      const userData = response.data;
+
+      // Populate form fields with user data
+      document.getElementById("email").value = userData.email;
+      document.getElementById("first_name").value = userData.first_name;
+      document.getElementById("last_name").value = userData.last_name;
+      document.getElementById("address").value = userData.address || '';
+      } catch (error) {
+          console.error(error);
+          alert("Error fetching user data for editing!");
+        }
+    }
+
+    populateForm();
+
+    // Submit form handler for updating user details
+    document.getElementById("editForm").addEventListener("submit", async function(event) {
+      event.preventDefault();
+      // Gather form data
+      const formData = {
+        email: document.getElementById("email").value,
+        password: document.getElementById("password").value,
+        first_name: document.getElementById("first_name").value,
+        last_name: document.getElementById("last_name").value,
+        address: document.getElementById("address").value || "NOT GIVEN",
+      };
+
+      // Update user details
+      try {
+        const response = await axios.post(`http://localhost:3000/updateUser?id=${userId}`, formData);
+        console.log(response.data);
+        alert("User details updated successfully!");
+      } catch (error) {
+          console.error(error);
+          alert("Error updating user details!");
+        }
+  });
+</script>
+</body>
+</html>
